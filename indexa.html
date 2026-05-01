@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dizionario abbreviazioni mediche online</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --surface: #ffffff;
+      --surface-2: #eef2f8;
+      --text: #172033;
+      --muted: #5c6b82;
+      --border: #d9e1ee;
+      --accent: #246bfe;
+      --accent-2: #18a999;
+      --danger: #b00020;
+      --shadow: 0 12px 32px rgba(20, 36, 70, .12);
+      --radius: 18px;
+    }
+
+    body.dark {
+      --bg: #10131a;
+      --surface: #171c26;
+      --surface-2: #202838;
+      --text: #eef3ff;
+      --muted: #aebad0;
+      --border: #303a4f;
+      --shadow: 0 12px 32px rgba(0, 0, 0, .35);
+    }
+
+    body.palette-blue {
+      --accent: #246bfe;
+      --accent-2: #18a999;
+    }
+
+    body.palette-green {
+      --accent: #168a4a;
+      --accent-2: #78b93f;
+    }
+
+    body.palette-purple {
+      --accent: #7c3aed;
+      --accent-2: #d946ef;
+    }
+
+    body.palette-red {
+      --accent: #d0382d;
+      --accent-2: #f59e0b;
+    }
+
+    body.palette-slate {
+      --accent: #475569;
+      --accent-2: #0ea5e9;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, color-mix(in srgb, var(--accent) 18%, transparent), transparent 32rem),
+        radial-gradient(circle at bottom right, color-mix(in srgb, var(--accent-2) 18%, transparent), transparent 30rem),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background .25s, color .25s;
+    }
+
+    .wrap {
+      width: min(1180px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 28px 0 42px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 1.4fr .9fr;
+      gap: 18px;
+      align-items: stretch;
+      margin-bottom: 18px;
+    }
+
+    .hero, .panel, .result-card, .source-card {
+      background: color-mix(in srgb, var(--surface) 92%, transparent);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .hero {
+      padding: 26px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -80px;
+      top: -80px;
+      width: 210px;
+      height: 210px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      opacity: .17;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.9rem, 3vw, 3.15rem);
+      line-height: 1.02;
+      letter-spacing: -0.04em;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 72ch;
+    }
+
+    .settings {
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .settings h2,
+    .panel h2 {
+      margin: 0;
+      font-size: 1.05rem;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    label {
+      font-size: .9rem;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 650;
+    }
+
+    select, input, textarea, button {
+      font: inherit;
+    }
+
+    select, input, textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 12px 13px;
+      outline: none;
+      transition: border .2s, box-shadow .2s, background .2s;
+    }
+
+    textarea {
+      min-height: 150px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+
+    select:focus, input:focus, textarea:focus {
+      border-color: color-mix(in srgb, var(--accent) 70%, white);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(340px, .92fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      padding: 18px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 11px 15px;
+      color: white;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      cursor: pointer;
+      font-weight: 750;
+      box-shadow: 0 8px 18px color-mix(in srgb, var(--accent) 25%, transparent);
+    }
+
+    button.secondary {
+      color: var(--text);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      box-shadow: none;
+    }
+
+    button.danger {
+      background: linear-gradient(135deg, var(--danger), #f97316);
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: .92rem;
+      line-height: 1.45;
+      margin: 10px 0 0;
+    }
+
+    .chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface-2);
+      color: var(--muted);
+      font-size: .86rem;
+    }
+
+    .chip strong {
+      color: var(--text);
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .metric {
+      padding: 13px;
+      border-radius: 16px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+    }
+
+    .metric .num {
+      font-size: 1.55rem;
+      font-weight: 850;
+      line-height: 1;
+      color: var(--accent);
+    }
+
+    .metric .txt {
+      margin-top: 5px;
+      font-size: .86rem;
+      color: var(--muted);
+    }
+
+    .results {
+      display: grid;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .result-card {
+      padding: 16px;
+      box-shadow: none;
+    }
+
+    .result-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .abbr {
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: var(--accent);
+      letter-spacing: .02em;
+    }
+
+    .status {
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--accent) 12%, var(--surface-2));
+      color: var(--text);
+      font-size: .78rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .answer-box {
+      margin: 12px 0 10px;
+      padding: 16px;
+      border-radius: 16px;
+      background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--accent) 16%, var(--surface)),
+        color-mix(in srgb, var(--accent-2) 14%, var(--surface))
+      );
+      border: 2px solid color-mix(in srgb, var(--accent) 45%, var(--border));
+    }
+
+    .answer-label {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: .82rem;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .answer-main {
+      font-size: clamp(1.18rem, 2.1vw, 1.55rem);
+      line-height: 1.32;
+      font-weight: 850;
+      color: var(--text);
+    }
+
+    .meaning {
+      margin: 8px 0 0;
+      font-size: 1.02rem;
+      line-height: 1.48;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .meta span {
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: var(--surface-2);
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: .8rem;
+    }
+
+    .not-found {
+      border-color: color-mix(in srgb, var(--danger) 35%, var(--border));
+    }
+
+    .not-found .abbr {
+      color: var(--danger);
+    }
+
+    .source-card {
+      padding: 14px;
+      margin-top: 12px;
+      box-shadow: none;
+    }
+
+    .advanced-area {
+      display: none;
+      margin-top: 12px;
+    }
+
+    .advanced-area.open {
+      display: block;
+    }
+
+    #toggleAdvancedBtn.active {
+      outline: 3px solid color-mix(in srgb, var(--accent) 22%, transparent);
+    }
+
+    .source-card h3 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+    }
+
+    .online-status {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: .92rem;
+    }
+
+    .source-toggle {
+      display: grid;
+      gap: 8px;
+      margin: 10px 0;
+    }
+
+    .source-toggle label {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin: 0;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .source-toggle input {
+      width: auto;
+      margin-top: 3px;
+    }
+
+    .copy-fallback {
+      display: none;
+      margin-top: 12px;
+      padding: 14px;
+      border-radius: 16px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+    }
+
+    .copy-fallback.open {
+      display: block;
+    }
+
+    .copy-fallback textarea {
+      min-height: 170px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: .9rem;
+      background: var(--surface);
+    }
+
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      color: var(--muted);
+      font-size: .86rem;
+      max-height: 220px;
+      overflow: auto;
+    }
+
+    .small {
+      font-size: .83rem;
+      color: var(--muted);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      overflow: hidden;
+      border-radius: 14px;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--border);
+      padding: 9px;
+      text-align: left;
+      vertical-align: top;
+      font-size: .9rem;
+    }
+
+    th {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+
+    mark {
+      background: color-mix(in srgb, var(--accent-2) 30%, transparent);
+      color: inherit;
+      border-radius: 4px;
+      padding: 0 2px;
+    }
+
+    @media (max-width: 880px) {
+      header, .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .summary {
+        grid-template-columns: 1fr;
+      }
+
+      .controls {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media print {
+      body {
+        background: white;
+        color: black;
+      }
+
+      .settings, .toolbar, .source-card, textarea, label[for="query"], #query {
+        display: none !important;
+      }
+
+      .hero, .panel, .result-card {
+        box-shadow: none;
+        border: 1px solid #bbb;
+      }
+
+      .wrap {
+        width: 100%;
+        padding: 0;
+      }
+    }
+  </style>
+</head>
+<body class="palette-blue">
+  <div class="wrap">
+    <header>
+      <section class="hero">
+        <h1>Dizionario online delle abbreviazioni mediche</h1>
+        <p class="subtitle">
+          Inserisci una o più abbreviazioni, anche separate da virgole, spazi o righe diverse. Puoi caricare database esterni online.
+          Il programma restituisce i significati disponibili mettendo in primo piano la risposta principale e lasciando sotto i dati accessori.
+        </p>
+      </section>
+
+      <aside class="settings">
+        <h2>Aspetto</h2>
+        <div class="controls">
+          <div>
+            <label for="theme">Tema</label>
+            <select id="theme">
+              <option value="light">Chiaro</option>
+              <option value="dark">Scuro</option>
+            </select>
+          </div>
+          <div>
+            <label for="palette">Combinazione colori</label>
+            <select id="palette">
+              <option value="blue">Blu clinico</option>
+              <option value="green">Verde sanitario</option>
+              <option value="purple">Viola ricerca</option>
+              <option value="red">Rosso emergenza</option>
+              <option value="slate">Ardesia tecnologica</option>
+            </select>
+          </div>
+        </div>
+        <div class="toolbar">
+          <button class="secondary" id="toggleAdvancedBtn" type="button">
+            Mostra funzioni avanzate
+          </button>
+        </div>
+        <p class="hint">
+          Le preferenze vengono salvate nel browser. Le funzioni avanzate sotto i risultati sono nascoste per default.
+        </p>
+      </aside>
+    </header>
+
+    <main class="grid">
+      <section class="panel">
+        <h2>Abbreviazioni da cercare</h2>
+        <label for="query">Scrivi qui</label>
+        <textarea id="query" placeholder="Esempi:
+ECG, BP, HR
+TAC
+RM
+BPCO"></textarea>
+
+        <div class="toolbar">
+          <button id="searchBtn">Cerca significato</button>
+          <button class="secondary" id="examplesBtn">Inserisci esempi</button>
+          <button class="secondary" id="copyBtn">Copia risultati</button>
+          <button class="secondary" id="downloadBtn">Scarica risultati CSV</button>
+          <button class="danger" id="clearBtn">Pulisci</button>
+        </div>
+
+        <div id="copyFallback" class="copy-fallback">
+          <label for="copyFallbackText">Copia manuale dei risultati</label>
+          <textarea id="copyFallbackText" readonly></textarea>
+          <p class="small">
+            Se il browser blocca la copia automatica dagli appunti, seleziona questo testo e copialo manualmente.
+          </p>
+        </div>
+
+        <p class="hint">
+          Puoi cercare anche parole presenti nel significato, per esempio “pressione”, “cuore”, “renale”. La ricerca nelle descrizioni usa parole esatte: “liver” non trova “delivery”.
+          In questo caso il programma restituisce tutte le abbreviazioni associate.
+        </p>
+
+
+        <div class="source-card">
+          <h3>Fonti online/API-like</h3>
+          <p class="small">
+            Questi pulsanti caricano dati esterni pubblici usando <code>fetch()</code>.
+            Non è una vera API clinica certificata, ma funziona come collegamento a database remoti CSV.
+          </p>
+
+          <div class="source-toggle">
+            <label>
+              <input type="checkbox" id="useMetaInventory" checked />
+              Meta-Inventory clinico: grande archivio americano di abbreviazioni e possibili significati.
+            </label>
+            <label>
+              <input type="checkbox" id="useSimpleCsv" checked />
+              Repository CSV medical_abbreviations: più semplice, utile come integrazione.
+            </label>
+          </div>
+
+          <div class="toolbar">
+            <button class="secondary" id="loadOnlineBtn">Carica database online</button>
+            <button class="secondary" id="clearOnlineBtn">Mantieni solo dizionario interno</button>
+          </div>
+
+          <div id="onlineStatus" class="online-status">
+            Fonti online non ancora caricate.
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Risultati</h2>
+
+        <div class="summary">
+          <div class="metric">
+            <div class="num" id="metricTotal">0</div>
+            <div class="txt">voci cercate</div>
+          </div>
+          <div class="metric">
+            <div class="num" id="metricFound">0</div>
+            <div class="txt">trovate</div>
+          </div>
+          <div class="metric">
+            <div class="num" id="metricDict">0</div>
+            <div class="txt">voci dizionario</div>
+          </div>
+        </div>
+
+        <div id="results" class="results">
+          <div class="result-card">
+            <div class="result-head">
+              <div class="abbr">Pronto</div>
+              <span class="status">in attesa</span>
+            </div>
+            <p class="meaning">
+              Inserisci una o più abbreviazioni nel riquadro a sinistra e premi “Cerca significato”.
+            </p>
+          </div>
+        </div>
+
+        </div>
+
+        <div id="advancedArea" class="advanced-area">
+          <div class="source-card">
+          <h3>Aggiungi una voce manualmente</h3>
+          <div class="controls">
+            <div>
+              <label for="newAbbr">Abbreviazione</label>
+              <input id="newAbbr" placeholder="Es. PCR" />
+            </div>
+            <div>
+              <label for="newCat">Categoria</label>
+              <input id="newCat" placeholder="Es. laboratorio" />
+            </div>
+          </div>
+          <label for="newMeaning">Significato</label>
+          <input id="newMeaning" placeholder="Es. proteina C reattiva" />
+          <label for="newNote">Nota opzionale</label>
+          <input id="newNote" placeholder="Eventuale ambiguità o contesto" />
+          <div class="toolbar">
+            <button class="secondary" id="addBtn">Aggiungi al dizionario</button>
+            <button class="secondary" id="exportDictBtn">Esporta dizionario JSON</button>
+          </div>
+        </div>
+
+          <div class="source-card">
+          <h3>Carica un tuo dizionario JSON o CSV</h3>
+          <input type="file" id="fileInput" accept=".json,.csv,text/csv,application/json" />
+          <p class="small">
+            Formato JSON consigliato:
+            <code>[{"abbr":"ECG","meaning":"elettrocardiogramma","category":"cardiologia","language":"IT"}]</code>
+          </p>
+          <p class="small">
+            Formato CSV: colonne <code>abbr,meaning,category,language,note</code>.
+          </p>
+          <div class="toolbar">
+            <button class="secondary" id="resetDictionaryBtn">Ripristina dizionario interno</button>
+          </div>
+
+          <div class="source-card">
+          <h3>Anteprima dizionario caricato</h3>
+          <pre id="dictionaryPreview"></pre>
+        </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const baseDictionary = [
+      { abbr: "ABG", meaning: "Arterial Blood Gas / emogasanalisi arteriosa", category: "laboratorio", language: "EN/IT", note: "Valuta ossigenazione, ventilazione ed equilibrio acido-base." },
+      { abbr: "ACE", meaning: "Angiotensin-Converting Enzyme / enzima di conversione dell'angiotensina", category: "cardiologia", language: "EN/IT", note: "Termine legato anche agli ACE-inibitori." },
+      { abbr: "ADL", meaning: "Activities of Daily Living / attività della vita quotidiana", category: "geriatria", language: "EN/IT", note: "Usato nella valutazione funzionale." },
+      { abbr: "AF", meaning: "Atrial Fibrillation / fibrillazione atriale", category: "cardiologia", language: "EN/IT", note: "Può indicare anche altri concetti in contesti diversi." },
+      { abbr: "ALT", meaning: "Alanine Aminotransferase / alanina aminotransferasi", category: "laboratorio", language: "EN/IT", note: "Enzima epatico." },
+      { abbr: "AST", meaning: "Aspartate Aminotransferase / aspartato aminotransferasi", category: "laboratorio", language: "EN/IT", note: "Enzima epatico e muscolare." },
+      { abbr: "BID", meaning: "Bis in die / due volte al giorno", category: "prescrizione", language: "LAT/IT", note: "Abbreviazione prescrittiva." },
+      { abbr: "BMI", meaning: "Body Mass Index / indice di massa corporea", category: "antropometria", language: "EN/IT", note: "In italiano anche IMC." },
+      { abbr: "BP", meaning: "Blood Pressure / pressione arteriosa", category: "parametri vitali", language: "EN/IT", note: "In italiano spesso PA." },
+      { abbr: "BPCO", meaning: "Broncopneumopatia cronica ostruttiva", category: "pneumologia", language: "IT", note: "In inglese COPD." },
+      { abbr: "BUN", meaning: "Blood Urea Nitrogen / azoto ureico ematico", category: "laboratorio", language: "EN/IT", note: "Indicatore correlato alla funzione renale e al metabolismo proteico." },
+      { abbr: "CBC", meaning: "Complete Blood Count / emocromo completo", category: "laboratorio", language: "EN/IT", note: "In italiano emocromo." },
+      { abbr: "CHF", meaning: "Congestive Heart Failure / scompenso cardiaco congestizio", category: "cardiologia", language: "EN/IT", note: "Espressione clinica anglosassone." },
+      { abbr: "CK", meaning: "Creatine Kinase / creatinchinasi", category: "laboratorio", language: "EN/IT", note: "Enzima muscolare." },
+      { abbr: "COPD", meaning: "Chronic Obstructive Pulmonary Disease / broncopneumopatia cronica ostruttiva", category: "pneumologia", language: "EN/IT", note: "Equivalente inglese di BPCO." },
+      { abbr: "CRP", meaning: "C-Reactive Protein / proteina C reattiva", category: "laboratorio", language: "EN/IT", note: "In italiano spesso PCR." },
+      { abbr: "CT", meaning: "Computed Tomography / tomografia computerizzata", category: "radiologia", language: "EN/IT", note: "In italiano TAC o TC." },
+      { abbr: "CXR", meaning: "Chest X-Ray / radiografia del torace", category: "radiologia", language: "EN/IT", note: "Abbreviazione frequente nei referti anglosassoni." },
+      { abbr: "DVT", meaning: "Deep Vein Thrombosis / trombosi venosa profonda", category: "vascolare", language: "EN/IT", note: "In italiano TVP." },
+      { abbr: "ECG", meaning: "Electrocardiogram / elettrocardiogramma", category: "cardiologia", language: "EN/IT", note: "In inglese si trova anche EKG." },
+      { abbr: "EEG", meaning: "Electroencephalogram / elettroencefalogramma", category: "neurologia", language: "EN/IT", note: "Registra l'attività elettrica cerebrale." },
+      { abbr: "EMG", meaning: "Electromyography / elettromiografia", category: "neurologia", language: "EN/IT", note: "Studio dell'attività elettrica muscolare." },
+      { abbr: "ENT", meaning: "Ear, Nose and Throat / otorinolaringoiatria", category: "specialità", language: "EN/IT", note: "In italiano ORL." },
+      { abbr: "ESR", meaning: "Erythrocyte Sedimentation Rate / velocità di eritrosedimentazione", category: "laboratorio", language: "EN/IT", note: "In italiano VES." },
+      { abbr: "FBS", meaning: "Fasting Blood Sugar / glicemia a digiuno", category: "laboratorio", language: "EN/IT", note: "Parametro metabolico." },
+      { abbr: "FEV1", meaning: "Forced Expiratory Volume in 1 second / volume espiratorio forzato nel primo secondo", category: "pneumologia", language: "EN/IT", note: "Parametro spirometrico." },
+      { abbr: "GI", meaning: "Gastrointestinal / gastrointestinale", category: "gastroenterologia", language: "EN/IT", note: "Può indicare apparato gastrointestinale." },
+      { abbr: "Hb", meaning: "Hemoglobin / emoglobina", category: "laboratorio", language: "EN/IT", note: "Parametro dell'emocromo." },
+      { abbr: "HbA1c", meaning: "Glycated Hemoglobin / emoglobina glicata", category: "diabetologia", language: "EN/IT", note: "Usata nel monitoraggio del diabete." },
+      { abbr: "HDL", meaning: "High-Density Lipoprotein / lipoproteina ad alta densità", category: "laboratorio", language: "EN/IT", note: "Colesterolo HDL." },
+      { abbr: "HR", meaning: "Heart Rate / frequenza cardiaca", category: "parametri vitali", language: "EN/IT", note: "In italiano FC." },
+      { abbr: "ICU", meaning: "Intensive Care Unit / terapia intensiva", category: "ospedale", language: "EN/IT", note: "In italiano TI o UTI." },
+      { abbr: "IM", meaning: "Intramuscular / intramuscolare", category: "somministrazione", language: "EN/IT", note: "Via di somministrazione." },
+      { abbr: "INR", meaning: "International Normalized Ratio / rapporto internazionale normalizzato", category: "coagulazione", language: "EN/IT", note: "Usato nel monitoraggio della coagulazione." },
+      { abbr: "IV", meaning: "Intravenous / endovenoso", category: "somministrazione", language: "EN/IT", note: "Via di somministrazione." },
+      { abbr: "LDL", meaning: "Low-Density Lipoprotein / lipoproteina a bassa densità", category: "laboratorio", language: "EN/IT", note: "Colesterolo LDL." },
+      { abbr: "LFT", meaning: "Liver Function Tests / esami di funzionalità epatica", category: "laboratorio", language: "EN/IT", note: "Pannello di esami epatici." },
+      { abbr: "MRI", meaning: "Magnetic Resonance Imaging / risonanza magnetica", category: "radiologia", language: "EN/IT", note: "In italiano RM o RMN." },
+      { abbr: "NPO", meaning: "Nil per os / nulla per bocca", category: "prescrizione", language: "LAT/IT", note: "Indicazione di digiuno." },
+      { abbr: "ORL", meaning: "Otorinolaringoiatria", category: "specialità", language: "IT", note: "Equivalente inglese: ENT." },
+      { abbr: "PA", meaning: "Pressione arteriosa", category: "parametri vitali", language: "IT", note: "Equivalente inglese: BP." },
+      { abbr: "PCR", meaning: "Proteina C reattiva oppure Polymerase Chain Reaction / reazione a catena della polimerasi", category: "laboratorio", language: "IT/EN", note: "Abbreviazione ambigua: in clinica italiana spesso proteina C reattiva; in biologia molecolare PCR." },
+      { abbr: "PE", meaning: "Pulmonary Embolism / embolia polmonare", category: "pneumologia", language: "EN/IT", note: "Può avere altri significati." },
+      { abbr: "PO", meaning: "Per os / per bocca", category: "somministrazione", language: "LAT/IT", note: "Via orale." },
+      { abbr: "PRN", meaning: "Pro re nata / al bisogno", category: "prescrizione", language: "LAT/IT", note: "Indicazione prescrittiva." },
+      { abbr: "PT", meaning: "Prothrombin Time / tempo di protrombina", category: "coagulazione", language: "EN/IT", note: "Può indicare anche Physical Therapy in altri contesti." },
+      { abbr: "PTT", meaning: "Partial Thromboplastin Time / tempo di tromboplastina parziale", category: "coagulazione", language: "EN/IT", note: "Esame della coagulazione." },
+      { abbr: "QID", meaning: "Quater in die / quattro volte al giorno", category: "prescrizione", language: "LAT/IT", note: "Abbreviazione prescrittiva." },
+      { abbr: "RBC", meaning: "Red Blood Cells / globuli rossi", category: "laboratorio", language: "EN/IT", note: "In italiano GR o eritrociti." },
+      { abbr: "RM", meaning: "Risonanza magnetica", category: "radiologia", language: "IT", note: "In inglese MRI." },
+      { abbr: "RMN", meaning: "Risonanza magnetica nucleare", category: "radiologia", language: "IT", note: "Termine ancora usato, spesso abbreviato RM." },
+      { abbr: "RR", meaning: "Respiratory Rate / frequenza respiratoria", category: "parametri vitali", language: "EN/IT", note: "Può indicare anche Relative Risk in epidemiologia." },
+      { abbr: "Rx", meaning: "Radiografia oppure prescrizione", category: "radiologia/prescrizione", language: "IT/EN", note: "Molto dipendente dal contesto." },
+      { abbr: "SOB", meaning: "Shortness of Breath / dispnea", category: "sintomi", language: "EN/IT", note: "Frequente nelle cartelle anglosassoni." },
+      { abbr: "SpO2", meaning: "Peripheral Oxygen Saturation / saturazione periferica di ossigeno", category: "parametri vitali", language: "EN/IT", note: "Misurata con pulsossimetro." },
+      { abbr: "TAC", meaning: "Tomografia assiale computerizzata", category: "radiologia", language: "IT", note: "Oggi spesso TC." },
+      { abbr: "TC", meaning: "Tomografia computerizzata", category: "radiologia", language: "IT", note: "Equivalente inglese CT." },
+      { abbr: "TID", meaning: "Ter in die / tre volte al giorno", category: "prescrizione", language: "LAT/IT", note: "Abbreviazione prescrittiva." },
+      { abbr: "TIA", meaning: "Transient Ischemic Attack / attacco ischemico transitorio", category: "neurologia", language: "EN/IT", note: "In italiano AIT." },
+      { abbr: "TSH", meaning: "Thyroid-Stimulating Hormone / ormone tireostimolante", category: "endocrinologia", language: "EN/IT", note: "Esame tiroideo." },
+      { abbr: "TVP", meaning: "Trombosi venosa profonda", category: "vascolare", language: "IT", note: "Equivalente inglese DVT." },
+      { abbr: "UA", meaning: "Urinalysis / esame delle urine", category: "laboratorio", language: "EN/IT", note: "Può avere altri significati." },
+      { abbr: "URI", meaning: "Upper Respiratory Infection / infezione delle vie respiratorie superiori", category: "infettivologia", language: "EN/IT", note: "Abbreviazione anglosassone." },
+      { abbr: "UTI", meaning: "Urinary Tract Infection / infezione delle vie urinarie", category: "infettivologia", language: "EN/IT", note: "In italiano IVU." },
+      { abbr: "VES", meaning: "Velocità di eritrosedimentazione", category: "laboratorio", language: "IT", note: "Equivalente inglese ESR." },
+      { abbr: "WBC", meaning: "White Blood Cells / globuli bianchi", category: "laboratorio", language: "EN/IT", note: "In italiano GB o leucociti." }
+    ];
+
+    let dictionary = loadDictionary();
+
+    const els = {
+      theme: document.getElementById("theme"),
+      palette: document.getElementById("palette"),
+      query: document.getElementById("query"),
+      results: document.getElementById("results"),
+      metricTotal: document.getElementById("metricTotal"),
+      metricFound: document.getElementById("metricFound"),
+      metricDict: document.getElementById("metricDict"),
+      dictionaryPreview: document.getElementById("dictionaryPreview"),
+      fileInput: document.getElementById("fileInput"),
+      newAbbr: document.getElementById("newAbbr"),
+      newCat: document.getElementById("newCat"),
+      newMeaning: document.getElementById("newMeaning"),
+      newNote: document.getElementById("newNote"),
+      onlineStatus: document.getElementById("onlineStatus"),
+      useMetaInventory: document.getElementById("useMetaInventory"),
+      useSimpleCsv: document.getElementById("useSimpleCsv"),
+      advancedArea: document.getElementById("advancedArea"),
+      toggleAdvancedBtn: document.getElementById("toggleAdvancedBtn"),
+      copyFallback: document.getElementById("copyFallback"),
+      copyFallbackText: document.getElementById("copyFallbackText")
+    };
+
+    let lastResults = [];
+
+    function normalize(s) {
+      return String(s || "")
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function normalizeAbbr(s) {
+      return String(s || "").trim().replace(/\s+/g, "").toUpperCase();
+    }
+
+    function containsExactWord(text, query) {
+      const t = normalize(text);
+      const q = normalize(query);
+      if (!q) return false;
+
+      const words = t
+        .split(/[^a-z0-9]+/i)
+        .filter(Boolean);
+
+      return words.includes(q);
+    }
+
+    function containsPhraseOrExactWords(text, query) {
+      const q = normalize(query);
+      if (!q) return false;
+
+      // Se l'utente scrive più parole, cerco la frase normalizzata come sequenza autonoma.
+      if (/\s/.test(q)) {
+        const t = " " + normalize(text).replace(/[^a-z0-9]+/gi, " ").replace(/\s+/g, " ").trim() + " ";
+        const phrase = " " + q.replace(/[^a-z0-9]+/gi, " ").replace(/\s+/g, " ").trim() + " ";
+        return t.includes(phrase);
+      }
+
+      // Se l'utente scrive una sola parola, deve essere una parola esatta:
+      // liver sì, delivery no.
+      return containsExactWord(text, q);
+    }
+
+    function escapeHtml(s) {
+      return String(s ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function highlight(text, term) {
+      if (!term || term.length < 2) return escapeHtml(text);
+      const safe = escapeHtml(text);
+      const escapedTerm = escapeHtml(term).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      try {
+        return safe.replace(new RegExp("(" + escapedTerm + ")", "gi"), "<mark>$1</mark>");
+      } catch {
+        return safe;
+      }
+    }
+
+    function splitQueries(raw) {
+      return [...new Set(
+        String(raw || "")
+          .split(/[\n,;|]+|\s{2,}/)
+          .map(x => x.trim())
+          .filter(Boolean)
+      )];
+    }
+
+    function searchOne(q) {
+      const qNorm = normalize(q);
+      const qAbbr = normalizeAbbr(q);
+
+      const exact = dictionary.filter(item => normalizeAbbr(item.abbr) === qAbbr);
+      if (exact.length) {
+        return { query: q, found: true, type: "corrispondenza esatta", items: exact };
+      }
+
+      const partial = dictionary.filter(item =>
+        normalizeAbbr(item.abbr).includes(qAbbr) ||
+        containsPhraseOrExactWords(item.meaning, q) ||
+        containsPhraseOrExactWords(item.category, q) ||
+        containsPhraseOrExactWords(item.note, q)
+      );
+
+      return {
+        query: q,
+        found: partial.length > 0,
+        type: partial.length ? "corrispondenza parziale" : "non trovata",
+        items: partial
+      };
+    }
+
+    function render() {
+      const queries = splitQueries(els.query.value);
+      const all = queries.map(searchOne);
+      lastResults = all;
+
+      const foundCount = all.filter(r => r.found).length;
+      els.metricTotal.textContent = queries.length;
+      els.metricFound.textContent = foundCount;
+      els.metricDict.textContent = dictionary.length;
+
+      if (!queries.length) {
+        els.results.innerHTML = `
+          <div class="result-card">
+            <div class="result-head">
+              <div class="abbr">Pronto</div>
+              <span class="status">in attesa</span>
+            </div>
+            <div class="answer-box">
+              <span class="answer-label">Risultato della ricerca</span>
+              <div class="answer-main">Inserisci una o più abbreviazioni e premi “Cerca significato”.</div>
+            </div>
+          </div>`;
+        return;
+      }
+
+      els.results.innerHTML = all.map(block => {
+        if (!block.found) {
+          return `
+            <div class="result-card not-found">
+              <div class="result-head">
+                <div class="abbr">${escapeHtml(block.query)}</div>
+                <span class="status">non trovata</span>
+              </div>
+              <div class="answer-box">
+                <span class="answer-label">Risultato della ricerca</span>
+                <div class="answer-main">Nessun significato trovato nel dizionario caricato.</div>
+              </div>
+              <div class="meta">
+                <span>Suggerimento: prova a caricare un dizionario più ampio o ad aggiungere la voce manualmente.</span>
+              </div>
+            </div>`;
+        }
+
+        return block.items.map(item => `
+          <div class="result-card">
+            <div class="result-head">
+              <div class="abbr">${highlight(item.abbr, block.query)}</div>
+              <span class="status">${escapeHtml(block.type)}</span>
+            </div>
+            <div class="answer-box">
+              <span class="answer-label">Risultato della ricerca</span>
+              <div class="answer-main">${highlight(item.meaning, block.query)}</div>
+            </div>
+            <div class="meta">
+              <span>Categoria: ${escapeHtml(item.category || "non indicata")}</span>
+              <span>Lingua: ${escapeHtml(item.language || "non indicata")}</span>
+              ${item.note ? `<span>Nota: ${highlight(item.note, block.query)}</span>` : ""}
+            </div>
+          </div>`).join("");
+      }).join("");
+    }
+
+    function updatePreview() {
+      const sample = dictionary.slice(0, 12).map(x => ({
+        abbr: x.abbr,
+        meaning: x.meaning,
+        category: x.category,
+        language: x.language,
+        note: x.note
+      }));
+      els.dictionaryPreview.textContent =
+        JSON.stringify(sample, null, 2) +
+        (dictionary.length > sample.length ? `\n\n... altre ${dictionary.length - sample.length} voci` : "");
+      els.metricDict.textContent = dictionary.length;
+    }
+
+    function saveDictionary() {
+      localStorage.setItem("medicalAbbrevDictionary", JSON.stringify(dictionary));
+      updatePreview();
+    }
+
+    function loadDictionary() {
+      try {
+        const saved = JSON.parse(localStorage.getItem("medicalAbbrevDictionary") || "null");
+        if (Array.isArray(saved) && saved.length) return saved;
+      } catch {}
+      return [...baseDictionary];
+    }
+
+    function resetDictionary() {
+      dictionary = [...baseDictionary];
+      saveDictionary();
+      render();
+    }
+
+
+    const onlineSources = {
+      metaInventory: "https://raw.githubusercontent.com/lisavirginia/clinical-abbreviations/master/metainventory/Metainventory_Version1.0.0.csv",
+      simpleCsvBase: "https://raw.githubusercontent.com/imantsm/medical_abbreviations/master/CSVs/",
+      simpleCsvFiles: [
+        "#-A, medical abbreviations.csv",
+        "B, medical abbreviations.csv",
+        "C, medical abbreviations.csv",
+        "D, medical abbreviations.csv",
+        "E-G, medical abbreviations.csv",
+        "H, medical abbreviations.csv",
+        "I, medical abbreviations.csv",
+        "J-L, medical abbreviations.csv",
+        "M, medical abbreviations.csv",
+        "N-O, medical abbreviations.csv",
+        "P, medical abbreviations.csv",
+        "Q-R, medical abbreviations.csv",
+        "S, medical abbreviations.csv",
+        "T, medical abbreviations.csv",
+        "U-Z, medical abbreviations.csv"
+      ]
+    };
+
+    async function fetchText(url) {
+      const response = await fetch(url, { cache: "force-cache" });
+      if (!response.ok) throw new Error("HTTP " + response.status + " per " + url);
+      return await response.text();
+    }
+
+    function parseMetaInventoryCsv(text) {
+      const rows = parseCsvRows(text);
+      if (!rows.length) return [];
+      const headers = rows[0].map(h => String(h || "").trim());
+      const idx = Object.fromEntries(headers.map((h, i) => [h, i]));
+
+      return rows.slice(1).map(r => ({
+        abbr: r[idx.SF] || r[idx.NormSF] || "",
+        meaning: r[idx.LF] || r[idx.NormLF] || "",
+        category: "Meta-Inventory clinico",
+        language: "EN",
+        note: [
+          r[idx.Source] ? "Fonte: " + r[idx.Source] : "",
+          r[idx.GroupID] ? "GroupID: " + r[idx.GroupID] : ""
+        ].filter(Boolean).join(" · ")
+      })).filter(x => x.abbr && x.meaning);
+    }
+
+    function parseSimpleMedicalCsv(text) {
+      const rows = parseCsvRows(text);
+      if (!rows.length) return [];
+      const headers = rows[0].map(h => normalize(h));
+
+      const findIndex = (...names) => {
+        for (const n of names) {
+          const i = headers.findIndex(h => h === normalize(n) || h.includes(normalize(n)));
+          if (i >= 0) return i;
+        }
+        return -1;
+      };
+
+      const abbrIdx = findIndex("abbr", "abbreviation", "acronym", "sigla");
+      const meaningIdx = findIndex("meaning", "definition", "full", "description", "significato");
+
+      return rows.slice(1).map(r => {
+        let abbr = abbrIdx >= 0 ? r[abbrIdx] : r[0];
+        let meaning = meaningIdx >= 0 ? r[meaningIdx] : r[1];
+
+        if (!meaning && r.length >= 2) {
+          meaning = r.slice(1).filter(Boolean).join("; ");
+        }
+
+        return {
+          abbr: abbr || "",
+          meaning: meaning || "",
+          category: "CSV medical_abbreviations",
+          language: "EN",
+          note: "Repository GitHub imantsm/medical_abbreviations"
+        };
+      }).filter(x => x.abbr && x.meaning);
+    }
+
+    function parseCsvRows(text) {
+      const rows = [];
+      let row = [], cell = "", inQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i], n = text[i + 1];
+
+        if (c === '"' && inQuotes && n === '"') {
+          cell += '"'; i++;
+        } else if (c === '"') {
+          inQuotes = !inQuotes;
+        } else if (c === "," && !inQuotes) {
+          row.push(cell); cell = "";
+        } else if ((c === "\n" || c === "\r") && !inQuotes) {
+          if (cell || row.length) {
+            row.push(cell);
+            rows.push(row);
+            row = [];
+            cell = "";
+          }
+          if (c === "\r" && n === "\n") i++;
+        } else {
+          cell += c;
+        }
+      }
+
+      if (cell || row.length) {
+        row.push(cell);
+        rows.push(row);
+      }
+      return rows;
+    }
+
+    async function loadOnlineDatabases() {
+      const started = new Date();
+      els.onlineStatus.textContent = "Caricamento in corso dalle fonti online...";
+      const collected = [];
+      const messages = [];
+
+      try {
+        if (els.useMetaInventory.checked) {
+          const text = await fetchText(onlineSources.metaInventory);
+          const items = parseMetaInventoryCsv(text);
+          collected.push(...items);
+          messages.push(`Meta-Inventory: ${items.length} voci importate`);
+        }
+
+        if (els.useSimpleCsv.checked) {
+          let total = 0;
+          for (const file of onlineSources.simpleCsvFiles) {
+            const url = onlineSources.simpleCsvBase + encodeURIComponent(file);
+            const text = await fetchText(url);
+            const items = parseSimpleMedicalCsv(text);
+            collected.push(...items);
+            total += items.length;
+          }
+          messages.push(`CSV medical_abbreviations: ${total} voci importate`);
+        }
+
+        if (!collected.length) {
+          els.onlineStatus.textContent = "Nessuna voce importata. Controlla la connessione o seleziona almeno una fonte.";
+          return;
+        }
+
+        mergeDictionary(collected);
+        const seconds = ((new Date() - started) / 1000).toFixed(1);
+        els.onlineStatus.textContent =
+          messages.join(" · ") +
+          `. Dizionario totale: ${dictionary.length} voci. Tempo: ${seconds} s.`;
+
+      } catch (err) {
+        els.onlineStatus.textContent =
+          "Errore durante il caricamento online: " + err.message +
+          ". Alcuni browser bloccano fetch() se il file HTML è aperto localmente; in quel caso pubblicalo su GitHub Pages/Netlify oppure usa il caricamento manuale CSV/JSON.";
+      }
+    }
+
+
+    function parseCsv(text) {
+      const rows = parseCsvRows(text);
+
+      if (!rows.length) return [];
+      const headers = rows[0].map(h => normalize(h));
+      return rows.slice(1).map(r => {
+        const obj = {};
+        headers.forEach((h, i) => obj[h] = r[i] || "");
+        return {
+          abbr: obj.abbr || obj.abbreviazione || obj.acronym || obj.sigla || "",
+          meaning: obj.meaning || obj.significato || obj.expansion || obj.definition || "",
+          category: obj.category || obj.categoria || "",
+          language: obj.language || obj.lingua || "",
+          note: obj.note || obj.notes || obj.nota || ""
+        };
+      }).filter(x => x.abbr && x.meaning);
+    }
+
+    function normalizeImportedArray(arr) {
+      return arr.map(x => ({
+        abbr: x.abbr || x.abbreviazione || x.acronym || x.sigla || "",
+        meaning: x.meaning || x.significato || x.expansion || x.definition || "",
+        category: x.category || x.categoria || "",
+        language: x.language || x.lingua || "",
+        note: x.note || x.notes || x.nota || ""
+      })).filter(x => x.abbr && x.meaning);
+    }
+
+    function mergeDictionary(newItems) {
+      const byKey = new Map(dictionary.map(x => [normalizeAbbr(x.abbr) + "|" + normalize(x.meaning), x]));
+      newItems.forEach(x => {
+        const clean = {
+          abbr: String(x.abbr || "").trim(),
+          meaning: String(x.meaning || "").trim(),
+          category: String(x.category || "").trim(),
+          language: String(x.language || "").trim(),
+          note: String(x.note || "").trim()
+        };
+        if (clean.abbr && clean.meaning) {
+          byKey.set(normalizeAbbr(clean.abbr) + "|" + normalize(clean.meaning), clean);
+        }
+      });
+      dictionary = [...byKey.values()].sort((a, b) => normalizeAbbr(a.abbr).localeCompare(normalizeAbbr(b.abbr)));
+      saveDictionary();
+      render();
+    }
+
+    function downloadText(filename, content, mime) {
+      const blob = new Blob([content], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function makeResultsCsv() {
+      const rows = [["query", "trovata", "abbreviazione", "significato", "categoria", "lingua", "nota"]];
+      lastResults.forEach(block => {
+        if (!block.found) {
+          rows.push([block.query, "no", "", "", "", "", ""]);
+        } else {
+          block.items.forEach(item => rows.push([
+            block.query,
+            "si",
+            item.abbr,
+            item.meaning,
+            item.category || "",
+            item.language || "",
+            item.note || ""
+          ]));
+        }
+      });
+      return rows.map(row => row.map(cell => `"${String(cell ?? "").replaceAll('"', '""')}"`).join(",")).join("\n");
+    }
+
+    function buildResultsText() {
+      if (!lastResults.length) render();
+
+      return lastResults.map(block => {
+        if (!block.found) return `${block.query}: non trovata`;
+        return block.items.map(item =>
+          `${item.abbr}: ${item.meaning}` +
+          (item.category ? ` [${item.category}]` : "") +
+          (item.language ? ` — ${item.language}` : "") +
+          (item.note ? ` — ${item.note}` : "")
+        ).join("\n");
+      }).join("\n\n");
+    }
+
+    async function copyResults() {
+      const text = buildResultsText();
+
+      if (!text.trim()) {
+        alert("Non ci sono risultati da copiare.");
+        return;
+      }
+
+      // Primo tentativo: API moderna degli appunti. Può essere bloccata se il file HTML è aperto localmente.
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+          els.copyFallback.classList.remove("open");
+          alert("Risultati copiati negli appunti.");
+          return;
+        }
+      } catch {}
+
+      // Secondo tentativo: metodo compatibile con molti browser più vecchi o file locali.
+      try {
+        const temp = document.createElement("textarea");
+        temp.value = text;
+        temp.setAttribute("readonly", "");
+        temp.style.position = "fixed";
+        temp.style.left = "-9999px";
+        temp.style.top = "0";
+        document.body.appendChild(temp);
+        temp.focus();
+        temp.select();
+        const ok = document.execCommand("copy");
+        document.body.removeChild(temp);
+
+        if (ok) {
+          els.copyFallback.classList.remove("open");
+          alert("Risultati copiati negli appunti.");
+          return;
+        }
+      } catch {}
+
+      // Terzo livello: mostra il testo già pronto da copiare manualmente.
+      els.copyFallbackText.value = text;
+      els.copyFallback.classList.add("open");
+      els.copyFallbackText.focus();
+      els.copyFallbackText.select();
+      alert("Il browser ha bloccato la copia automatica. Ho preparato il testo in un riquadro: puoi copiarlo manualmente.");
+    }
+
+    function applyAppearance() {
+      const theme = localStorage.getItem("medicalAbbrevTheme") || "light";
+      const palette = localStorage.getItem("medicalAbbrevPalette") || "blue";
+      els.theme.value = theme;
+      els.palette.value = palette;
+      document.body.classList.toggle("dark", theme === "dark");
+      document.body.className = document.body.className
+        .replace(/\bpalette-\w+\b/g, "")
+        .trim();
+      document.body.classList.add("palette-" + palette);
+      if (theme === "dark") document.body.classList.add("dark");
+    }
+
+    document.getElementById("searchBtn").addEventListener("click", render);
+    els.query.addEventListener("keydown", e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") render();
+    });
+
+    document.getElementById("examplesBtn").addEventListener("click", () => {
+      els.query.value = "ECG, BP, HR\nTAC\nRM\nPCR\nBPCO\nUTI";
+      render();
+    });
+
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      els.query.value = "";
+      lastResults = [];
+      render();
+    });
+
+    document.getElementById("copyBtn").addEventListener("click", copyResults);
+
+    document.getElementById("downloadBtn").addEventListener("click", () => {
+      if (!lastResults.length) render();
+      downloadText("risultati_abbreviazioni_mediche.csv", makeResultsCsv(), "text/csv;charset=utf-8");
+    });
+
+    document.getElementById("resetDictionaryBtn").addEventListener("click", resetDictionary);
+
+    document.getElementById("loadOnlineBtn").addEventListener("click", loadOnlineDatabases);
+
+    document.getElementById("clearOnlineBtn").addEventListener("click", () => {
+      resetDictionary();
+      els.onlineStatus.textContent = "Dizionario riportato alla versione interna iniziale.";
+    });
+
+    document.getElementById("exportDictBtn").addEventListener("click", () => {
+      downloadText("dizionario_abbreviazioni_mediche.json", JSON.stringify(dictionary, null, 2), "application/json;charset=utf-8");
+    });
+
+    document.getElementById("addBtn").addEventListener("click", () => {
+      const item = {
+        abbr: els.newAbbr.value.trim(),
+        meaning: els.newMeaning.value.trim(),
+        category: els.newCat.value.trim(),
+        language: "IT",
+        note: els.newNote.value.trim()
+      };
+
+      if (!item.abbr || !item.meaning) {
+        alert("Inserisci almeno abbreviazione e significato.");
+        return;
+      }
+
+      mergeDictionary([item]);
+      els.newAbbr.value = "";
+      els.newMeaning.value = "";
+      els.newCat.value = "";
+      els.newNote.value = "";
+      alert("Voce aggiunta al dizionario locale.");
+    });
+
+    els.fileInput.addEventListener("change", async e => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const text = await file.text();
+      let imported = [];
+
+      try {
+        if (file.name.toLowerCase().endsWith(".json")) {
+          imported = normalizeImportedArray(JSON.parse(text));
+        } else {
+          imported = parseCsv(text);
+        }
+      } catch (err) {
+        alert("Non sono riuscita a leggere il file. Controlla il formato JSON o CSV.");
+        return;
+      }
+
+      if (!imported.length) {
+        alert("Il file non contiene voci riconoscibili. Usa colonne abbr, meaning, category, language, note.");
+        return;
+      }
+
+      mergeDictionary(imported);
+      alert(`Importate ${imported.length} voci. Il dizionario ora contiene ${dictionary.length} voci.`);
+      e.target.value = "";
+    });
+
+    els.theme.addEventListener("change", () => {
+      localStorage.setItem("medicalAbbrevTheme", els.theme.value);
+      applyAppearance();
+    });
+
+    els.palette.addEventListener("change", () => {
+      localStorage.setItem("medicalAbbrevPalette", els.palette.value);
+      applyAppearance();
+    });
+
+    els.toggleAdvancedBtn.addEventListener("click", () => {
+      const isOpen = els.advancedArea.classList.toggle("open");
+      els.toggleAdvancedBtn.classList.toggle("active", isOpen);
+      els.toggleAdvancedBtn.textContent = isOpen
+        ? "Nascondi funzioni avanzate"
+        : "Mostra funzioni avanzate";
+    });
+
+    applyAppearance();
+    updatePreview();
+    render();
+  </script>
+</body>
+</html>
